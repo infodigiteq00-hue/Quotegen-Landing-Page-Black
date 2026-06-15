@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>QuoteGen — Advanced Quotation Maker</title>
+<!-- Microsoft Clarity (@microsoft/clarity npm package) -->
+<script type="module">
+    import Clarity from '../node_modules/@microsoft/clarity/index.js';
+    Clarity.init('x7elqy7zmx');
+</script>
+<link rel="icon" type="image/png" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --blue:#2563EB;--blue-d:#1D4ED8;--blue-bg:#EFF6FF;
+  --green:#16A34A;--green-bg:#F0FDF4;
+  --ink:#111827;--mid:#374151;--muted:#6B7280;--subtle:#9CA3AF;
+  --border:#E5E7EB;--bg:#F9FAFB;--white:#fff;
+  --r:10px;--r-lg:16px;
+}
+/* accent top stripe */
+body::before{content:"";display:block;height:4px;background:linear-gradient(90deg,#2563EB,#7C3AED,#2563EB);background-size:200% 100%;animation:stripe 4s linear infinite}
+@keyframes stripe{0%{background-position:0% 0}100%{background-position:200% 0}}
+/* hero gets a very subtle radial tint */
+.hero{background:radial-gradient(ellipse 80% 60% at 50% -10%,#EFF6FF 0%,transparent 70%)}
+html,body{font-family:'Inter',system-ui,sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{text-decoration:none;color:inherit}
+button{font:inherit;border:0;cursor:pointer;background:none}
+img{display:block;max-width:100%}
+ul{list-style:none}
+.wrap{max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* NAV */
+.nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px}
+.logo{display:flex;align-items:center}
+.logo-lockup{height:36px;width:auto;display:block}
+.logo-mark{width:32px;height:32px;flex:none;object-fit:contain}
+.logo .gen{color:var(--blue)}
+.nav-right{display:flex;align-items:center;gap:14px;flex-shrink:0;margin-left:auto}
+.nav-phone{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--mid);white-space:nowrap;transition:color .15s}
+.nav-phone:hover{color:var(--blue)}
+.nav-phone svg{color:var(--blue);flex:none;opacity:.85}
+.nav-cta{background:var(--blue);color:#fff;font-weight:600;font-size:13px;padding:8px 18px;border-radius:99px;transition:background .15s;white-space:nowrap}
+.nav-cta:hover{background:var(--blue-d)}
+
+/* HERO */
+.hero{padding:72px 0 64px;text-align:center}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--blue-bg);color:var(--blue);font-size:12px;font-weight:600;padding:5px 12px;border-radius:99px;margin-bottom:24px;border:1px solid #BFDBFE}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+h1{font-size:clamp(36px,6vw,68px);font-weight:800;letter-spacing:-.035em;line-height:1.08;margin-bottom:40px;max-width:840px;margin-left:auto;margin-right:auto;color:var(--ink)}
+h1 .accent{color:var(--blue)}
+.hero-sub{font-size:clamp(15px,1.8vw,18px);color:var(--muted);line-height:1.65;max-width:560px;margin:0 auto 36px}
+
+/* CTA BAR */
+.cta-bar{max-width:600px;margin:0 auto 14px;background:#fff;border:1.5px solid var(--border);border-radius:14px;padding:10px 10px 10px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 4px 24px rgba(37,99,235,.10);transition:box-shadow .2s,border-color .2s}
+.cta-bar:focus-within{border-color:var(--blue);box-shadow:0 4px 28px rgba(37,99,235,.18)}
+.cta-bar-field{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.cta-bar-field svg{color:var(--blue);flex:none;opacity:.7}
+.cta-bar-field input{border:0;outline:0;width:100%;font:inherit;font-size:14px;color:var(--ink);background:transparent}
+.cta-bar-field input::placeholder{color:var(--subtle)}
+.cta-bar-field.err{border-color:#FCA5A5!important;background:#FEF2F2!important}
+.cta-bar-sep{font-size:11px;font-weight:700;color:var(--subtle);flex:none;padding:0 4px}
+.cta-bar-divider{width:1px;height:28px;background:var(--border);flex:none}
+.btn-cta-bar{background:var(--blue);color:#fff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;white-space:nowrap;display:flex;align-items:center;gap:8px;transition:background .15s,transform .15s;flex:none;position:relative;overflow:hidden;text-decoration:none}
+.btn-cta-bar::after{content:"";position:absolute;top:0;left:-80%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-18deg);animation:sheen 2.8s ease infinite}
+@keyframes sheen{0%,50%{left:-80%}100%{left:130%}}
+.btn-cta-bar:hover{background:var(--blue-d);transform:translateY(-1px)}
+.btn-cta-bar:disabled{opacity:.65;cursor:not-allowed;transform:none}
+.btn-cta-bar:disabled::after{display:none}
+.cta-bar-note{font-size:12.5px;color:var(--muted);text-align:center}
+.cta-bar-note strong{color:var(--ink)}
+
+.hero-trust{display:flex;align-items:center;justify-content:center;gap:6px;font-size:13px;color:var(--muted)}
+.hero-trust .sep{color:var(--border)}
+
+/* STATS BAR */
+.stats-bar{background:linear-gradient(160deg,#1E3A8A 0%,#1D4ED8 55%,#4F46E5 100%);border-top:0;border-bottom:0;padding:24px 0}
+.stats-inner{display:flex;align-items:center;justify-content:center;gap:0}
+.stat{text-align:center;padding:0 40px;border-right:1px solid rgba(255,255,255,.2)}
+.stat:last-child{border-right:0}
+.stat-n{font-size:24px;font-weight:800;color:#fff;letter-spacing:-.03em}
+.stat-l{font-size:12px;color:rgba(255,255,255,.6);margin-top:2px}
+
+/* PAIN + GAIN — before/after */
+.before-after{padding:72px 0}
+.section-label{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:12px}
+.before-after h2{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.025em;line-height:1.2;margin-bottom:48px}
+.ba-grid{display:grid;grid-template-columns:1fr 48px 1fr;gap:0;align-items:center}
+.ba-col{display:flex;flex-direction:column;gap:12px}
+.ba-item{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 18px;display:flex;gap:12px;align-items:flex-start}
+.ba-item.bad{border-color:#FECACA;background:#FFF5F5}
+.ba-item.good{border-color:#BBF7D0;background:#F0FDF4}
+.ba-ico{width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex:none;font-size:15px}
+.ba-ico.red{background:#FEE2E2;color:#DC2626}
+.ba-ico.grn{background:#DCFCE7;color:var(--green)}
+.ba-item-text strong{font-size:13.5px;font-weight:700;display:block;margin-bottom:2px}
+.ba-item-text span{font-size:12.5px;color:var(--muted)}
+.ba-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--blue);padding:0 8px}
+.ba-arrow svg{animation:pulse-arrow 1.6s ease-in-out infinite}
+@keyframes pulse-arrow{0%,100%{opacity:.4;transform:scale(.9)}50%{opacity:1;transform:scale(1)}}
+
+/* HOW IT WORKS */
+.how{padding:72px 0;background:var(--white);border-top:1px solid var(--border)}
+.how h2{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.025em;margin-bottom:8px;color:var(--ink)}
+.how-sub{font-size:15px;color:var(--muted);margin-bottom:48px}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;position:relative}
+.steps::before{content:"";position:absolute;top:36px;left:calc(33.33% - 1px);right:calc(33.33% - 1px);height:1px;background:var(--border);z-index:0}
+.step{padding:0 28px;text-align:center;position:relative;z-index:1}
+.step:first-child{padding-left:0}
+.step:last-child{padding-right:0}
+.step-num{width:72px;height:72px;border-radius:50%;border:2px solid var(--border);background:var(--bg);display:grid;place-items:center;margin:0 auto 20px;position:relative}
+.step-num .n{font-size:22px;font-weight:800;color:var(--ink)}
+.step-num.done{background:var(--blue);border-color:var(--blue)}
+.step-num.done .n{color:#fff}
+.step h3{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--ink)}
+.step p{font-size:13.5px;color:var(--muted);line-height:1.6}
+
+/* DEMO */
+.demo{padding:72px 0}
+.demo h2{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.025em;margin-bottom:8px}
+.demo-sub{font-size:15px;color:var(--muted);margin-bottom:36px}
+.demo-wrap{display:grid;grid-template-columns:1fr 64px 1fr;gap:0;align-items:start}
+.demo-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-top{display:flex;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg)}
+.card-top .badge{width:8px;height:8px;border-radius:50%;flex:none}
+.badge-blue{background:var(--blue)}
+.badge-green{background:var(--green)}
+.card-top-label{font-size:12px;font-weight:600;color:var(--mid)}
+.mail-tag{margin-left:auto;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);background:var(--blue-bg);padding:3px 9px;border-radius:99px}
+.mail-subject-row{padding:14px 16px 12px}
+.mail-subject{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.3;letter-spacing:-.01em}
+.mail-from{display:flex;gap:11px;align-items:flex-start;padding:0 16px 14px;border-bottom:1px solid var(--border)}
+.mail-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#7C3AED);color:#fff;font-weight:700;font-size:16px;display:grid;place-items:center;flex:none}
+.mail-from-info{flex:1;min-width:0}
+.mail-from-top{display:flex;align-items:baseline;gap:8px;justify-content:space-between}
+.mail-from-name{font-size:13.5px;font-weight:700;color:var(--ink)}
+.mail-time{font-size:11px;color:var(--subtle);flex:none;white-space:nowrap}
+.mail-from-email{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mail-to{font-size:11.5px;color:var(--subtle);margin-top:2px}
+.mail-body{padding:14px 16px;font-size:12.5px;color:var(--mid);line-height:1.7;max-height:220px;overflow-y:auto}
+.mail-body p{margin-bottom:8px}
+.mail-body ul{padding-left:2px}
+.mail-body ul li{display:flex;gap:6px;margin-bottom:4px;font-weight:500;color:var(--ink)}
+.mail-body ul li::before{content:"·";color:var(--blue);font-weight:800}
+.extract-row{padding:12px 16px}
+.btn-extract{width:100%;background:var(--blue);color:#fff;font-weight:700;font-size:13px;padding:10px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;gap:7px;transition:background .15s}
+.btn-extract:hover{background:var(--blue-d)}
+.btn-extract.done{background:var(--green)}
+.btn-extract.busy{opacity:.7;pointer-events:none}
+.spin{display:none;width:13px;height:13px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+.btn-extract.busy .spin{display:block}
+.btn-extract.busy .ext-ico{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.demo-mid{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px 0}
+.mid-q{width:44px;height:44px;background:#fff;border:1px solid var(--border);border-radius:50%;display:grid;place-items:center;flex:none;box-shadow:0 2px 8px rgba(37,99,235,.15)}
+.mid-q img{width:26px;height:26px;object-fit:contain}
+.mid-arr{display:flex;flex-direction:column;gap:5px}
+.mid-arr span{width:6px;height:6px;border-right:2px solid var(--blue);border-bottom:2px solid var(--blue);transform:rotate(45deg);margin:0 auto}
+.mid-arr span:nth-child(1){opacity:.25}
+.mid-arr span:nth-child(2){opacity:.55}
+.mid-arr span:nth-child(3){opacity:1}
+.result-inner{padding:14px 16px;max-height:520px;overflow-y:auto}
+.result-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;gap:8px;color:var(--subtle);text-align:center}
+.result-placeholder svg{opacity:.4}
+.result-placeholder p{font-size:13px}
+.result-placeholder.active{display:none}
+.q-preview{border:1px solid var(--border);border-radius:8px;overflow-y:auto;max-height:300px;margin:4px 0 2px;box-shadow:0 1px 6px rgba(0,0,0,.08)}
+.q-preview img{width:100%;display:block}
+.q-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.q-table th{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--subtle);text-align:left;padding:4px 4px;border-bottom:1px solid var(--border);font-weight:600}
+.q-table td{padding:6px 4px;border-bottom:1px solid var(--bg);color:var(--ink);font-weight:500}
+.q-table td:last-child,.q-table th:last-child{text-align:right}
+.q-total-row{display:flex;justify-content:space-between;font-weight:800;font-size:13px;padding:8px 4px 0;border-top:1.5px solid var(--ink);margin-top:4px}
+.result-shown{display:none}
+.result-shown.show{display:block}
+
+/* TESTIMONIALS */
+.testi{padding:72px 0;background:var(--bg);border-top:1px solid var(--border)}
+.testi h2{font-size:clamp(22px,3vw,32px);font-weight:800;letter-spacing:-.025em;margin-bottom:8px}
+.testi-sub{font-size:15px;color:var(--muted);margin-bottom:40px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.testi-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-lg);padding:22px 20px}
+.stars{color:#F59E0B;font-size:14px;letter-spacing:1px;margin-bottom:12px}
+.testi-q{font-size:14px;color:var(--mid);line-height:1.65;margin-bottom:16px}
+.testi-q strong{color:var(--ink)}
+.testi-who{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;color:#fff;flex:none}
+.av1{background:#2563EB}.av2{background:#7C3AED}.av3{background:#16A34A}
+.av-name{font-size:13px;font-weight:700}
+.av-role{font-size:12px;color:var(--muted)}
+
+/* CTA */
+.cta-section{padding:72px 0 80px;background:linear-gradient(160deg,#1E3A8A 0%,#1D4ED8 45%,#4F46E5 100%)}
+.cta-box{border-radius:var(--r-lg);padding:56px 48px;display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:center}
+.cta-left h2{font-size:clamp(26px,3.2vw,38px);font-weight:800;letter-spacing:-.025em;color:#fff;margin-bottom:24px;line-height:1.2}
+.cta-mini-testi{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);border-radius:var(--r);padding:14px 16px}
+.cta-mini-testi .stars{font-size:12px;margin-bottom:6px}
+.cta-mini-q{font-size:13.5px;color:rgba(255,255,255,.85);line-height:1.6;margin-bottom:6px}
+.cta-mini-who{font-size:12px;color:rgba(255,255,255,.45);font-weight:600}
+.cta-form-card{background:#fff;border-radius:var(--r-lg);padding:28px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.cta-form-title{font-size:16px;font-weight:800;margin-bottom:4px}
+.cta-form-note{font-size:12.5px;color:var(--muted);margin-bottom:20px;display:flex;align-items:center;gap:6px}
+.cta-form-note .live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 2s ease-in-out infinite}
+.cta-fields{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.cta-or{display:flex;align-items:center;gap:10px;color:var(--subtle);font-size:11px;font-weight:700;letter-spacing:.06em}
+.cta-or::before,.cta-or::after{content:"";flex:1;height:1px;background:var(--border)}
+.cta-fields input{border:1.5px solid var(--border);border-radius:var(--r);padding:12px 14px;font:inherit;font-size:14px;outline:0;transition:border-color .15s;color:var(--ink);width:100%}
+.cta-fields input:focus{border-color:var(--blue)}
+.cta-fields input.err{border-color:#FCA5A5!important;background:#FEF2F2!important}
+.cta-fields input::placeholder{color:var(--subtle)}
+.btn-cta{width:100%;background:var(--blue);color:#fff;font-weight:700;font-size:15px;padding:14px;border-radius:var(--r);transition:background .15s;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-cta:hover{background:var(--blue-d)}
+.btn-cta:disabled{opacity:.65;cursor:not-allowed}
+.cta-guarantee{font-size:12px;color:var(--muted);text-align:center;margin-top:10px}
+
+/* FOOTER */
+footer{background:#111827;color:#fff;padding:48px 0 0}
+.foot-grid{display:grid;grid-template-columns:1.4fr 1fr 1.2fr;gap:48px;padding-bottom:40px;border-bottom:1px solid rgba(255,255,255,.1)}
+.foot-logo{display:flex;align-items:center;gap:8px;font-weight:800;font-size:17px;color:#fff;margin-bottom:14px}
+.foot-logo .gen{color:#60A5FA}
+.foot-desc{font-size:13px;color:rgba(255,255,255,.5);line-height:1.6;max-width:260px}
+.foot-h{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:14px}
+.foot-links{display:flex;flex-direction:column;gap:10px}
+.foot-links a{font-size:13.5px;color:rgba(255,255,255,.6);transition:color .15s}
+.foot-links a:hover{color:#fff}
+.foot-contact{display:flex;flex-direction:column;gap:10px;font-size:13px;color:rgba(255,255,255,.6)}
+.foot-contact a{color:rgba(255,255,255,.6);transition:color .15s}
+.foot-contact a:hover{color:#fff}
+.foot-bar{padding:18px 0;display:flex;align-items:center;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.35);flex-wrap:wrap;gap:8px}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s cubic-bezier(.22,1,.36,1)}
+.rv.in{opacity:1;transform:none}
+.rv1{transition-delay:.08s}.rv2{transition-delay:.16s}.rv3{transition-delay:.24s}
+
+/* MID CTA */
+.mid-cta{padding:72px 0;background:linear-gradient(160deg,#1E3A8A 0%,#1D4ED8 55%,#4F46E5 100%);position:relative;overflow:hidden}
+.mid-cta::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 110% 50%,rgba(255,255,255,.12),transparent 65%);pointer-events:none}
+.mid-cta::after{content:"";position:absolute;top:-60px;left:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none}
+.mid-cta-inner{display:flex;align-items:center;justify-content:space-between;gap:40px;flex-wrap:wrap;position:relative;z-index:1}
+.mid-cta-text{flex:none;max-width:360px}
+.mid-cta-eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,.75);margin-bottom:10px}
+.mid-cta-h{font-size:clamp(26px,3vw,38px);font-weight:900;letter-spacing:-.03em;color:#fff;margin-bottom:10px;line-height:1.1}
+.mid-cta-sub{font-size:15px;color:rgba(255,255,255,.8);line-height:1.6}
+.mid-cta-form{flex:1;min-width:280px;max-width:580px}
+.mid-cta-bar{margin:0 0 10px;background:#fff;border-color:#fff;box-shadow:0 8px 32px rgba(0,0,0,.18)}
+.mid-cta-note{font-size:12.5px;color:rgba(255,255,255,.75);text-align:center;font-weight:500}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .ba-grid{grid-template-columns:1fr;gap:12px}
+  .ba-arrow{flex-direction:row;padding:8px 0}
+  .ba-arrow svg{transform:rotate(90deg)}
+  .steps{grid-template-columns:1fr;gap:28px}
+  .steps::before{display:none}
+  .step{padding:0;text-align:left;display:flex;gap:16px;align-items:flex-start}
+  .step-num{margin:0;width:48px;height:48px;flex:none}
+  .step-num .n{font-size:18px}
+  .demo-wrap{grid-template-columns:1fr;gap:12px}
+  .demo-mid{display:none}
+  .testi-grid{grid-template-columns:1fr}
+  .cta-box{grid-template-columns:1fr;gap:28px;padding:36px 24px}
+  .foot-grid{grid-template-columns:1fr;gap:28px}
+  .mid-cta-inner{gap:28px}
+  .mid-cta-text{max-width:none}
+}
+
+@media(max-width:640px){
+  .wrap{padding:0 18px}
+  /* tighter vertical rhythm so phones don't endlessly scroll */
+  .hero{padding:40px 0 36px}
+  h1{font-size:35px;line-height:1.12;margin-bottom:28px}
+  .before-after,.how,.demo,.testi,.mid-cta{padding:52px 0}
+  .cta-section{padding:52px 0 60px}
+  .before-after h2,.how h2,.demo h2,.testi h2{margin-bottom:28px}
+
+  /* CTA bars: stack inputs + button vertically */
+  .cta-bar{flex-direction:column;align-items:stretch;gap:8px;padding:8px}
+  .cta-bar-field{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px 12px;background:#fff}
+  .cta-bar-divider{display:none}
+  .cta-bar-sep{display:flex;align-items:center;gap:10px;width:100%;padding:2px 0;color:var(--subtle);font-size:11px;font-weight:700;letter-spacing:.06em}
+  .cta-bar-sep::before,.cta-bar-sep::after{content:"";flex:1;height:1px;background:var(--border)}
+  .btn-cta-bar{width:100%;justify-content:center;padding:14px}
+  /* 16px inputs prevent iOS auto-zoom on focus */
+  .cta-bar-field input,.cta-fields input{font-size:16px}
+
+  /* stats 2x2 */
+  .stats-inner{flex-wrap:wrap;gap:0}
+  .stat{width:50%;padding:16px 0;border-right:0;border-bottom:1px solid rgba(255,255,255,.2)}
+  .stat:nth-child(odd){border-right:1px solid rgba(255,255,255,.2)}
+  .stat:last-child,.stat:nth-last-child(2):nth-child(odd){border-bottom:0}
+
+  .cta-box{padding:28px 20px}
+  .cta-left h2{font-size:24px;line-height:1.22;margin-bottom:20px}
+  .cta-form-card{padding:22px}
+  .testi-card{padding:20px 18px}
+  .mail-subject{font-size:14.5px}
+  .mail-avatar{width:36px;height:36px;font-size:15px}
+  .mail-body{max-height:200px}
+  .nav-right{gap:10px}
+  .nav-phone{font-size:12px}
+}
+
+@media(max-width:420px){
+  .nav-in{height:54px;gap:8px}
+  .logo-lockup{height:28px}
+  .nav-right{gap:8px}
+  .nav-phone{padding:6px}
+  .nav-phone-text{display:none}
+  .nav-cta{font-size:11px;padding:7px 11px}
+  h1{font-size:30px}
+  .btn-cta-bar{font-size:13px}
+  .stat-n{font-size:20px}
+  .stat-l{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap nav-in">
+    <div class="logo">
+      <img class="logo-lockup" src="/logo-nav.png" alt="QuoteGen — By Digiteq Solution">
+    </div>
+    <div class="nav-right">
+      <a href="tel:+919067610118" class="nav-phone" aria-label="Call +91 90676 10118">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span class="nav-phone-text">+91 90676 10118</span>
+      </a>
+      <a href="#signup" class="nav-cta">Start Free Trial →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-badge rv"><span class="dot"></span> 214 businesses already quoting faster</div>
+    <h1 class="rv rv1">Turn Any Enquiry Into a<br><span class="accent">Professional Quote</span> in 2&nbsp;Minutes</h1>
+    <div class="cta-bar rv rv2">
+      <div class="cta-bar-field">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <input id="heroPhone" type="tel" placeholder="Mobile Number" inputmode="tel" aria-label="Mobile number">
+      </div>
+      <div class="cta-bar-divider"></div>
+      <span class="cta-bar-sep">OR</span>
+      <div class="cta-bar-divider"></div>
+      <div class="cta-bar-field">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 7l10 7 10-7"/></svg>
+        <input id="heroEmail" type="email" placeholder="Email Address" aria-label="Email address">
+      </div>
+      <button id="heroBar" class="btn-cta-bar" type="button">Start my free trial →</button>
+    </div>
+    <p class="cta-bar-note rv rv3">No credit card required · <strong>10 Days Free Trial</strong></p>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar rv">
+  <div class="wrap">
+    <div class="stats-inner">
+      <div class="stat"><div class="stat-n" id="c1">3,841</div><div class="stat-l">Quotes Generated</div></div>
+      <div class="stat"><div class="stat-n">214+</div><div class="stat-l">Businesses Using QuoteGen</div></div>
+      <div class="stat"><div class="stat-n">&lt; 2 min</div><div class="stat-l">Average Quote Time</div></div>
+      <div class="stat"><div class="stat-n">4.9 ★</div><div class="stat-l">Average Rating</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- BEFORE / AFTER -->
+<section class="before-after">
+  <div class="wrap">
+    <div class="section-label rv">The Difference</div>
+    <h2 class="rv rv1">Before QuoteGen vs. After</h2>
+    <div class="ba-grid">
+      <div class="ba-col rv rv1">
+        <div class="ba-item bad">
+          <div class="ba-ico red">⏱</div>
+          <div class="ba-item-text"><strong>45 minutes per quote</strong><span>Hunting catalogues, calling distributors, formatting in Word</span></div>
+        </div>
+        <div class="ba-item bad">
+          <div class="ba-ico red">📥</div>
+          <div class="ba-item-text"><strong>Enquiries pile up unanswered</strong><span>Complex multi-item RFQs sit unquoted while the buyer moves on</span></div>
+        </div>
+        <div class="ba-item bad">
+          <div class="ba-ico red">💸</div>
+          <div class="ba-item-text"><strong>Lost orders you never knew about</strong><span>Buyer went with whoever replied first. You never found out.</span></div>
+        </div>
+      </div>
+
+      <div class="ba-arrow rv">
+        <svg width="24" height="60" viewBox="0 0 24 60" fill="none">
+          <path d="M12 4 L12 48" stroke="#2563EB" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>
+          <path d="M6 42l6 8 6-8" stroke="#2563EB" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div class="ba-col rv rv2">
+        <div class="ba-item good">
+          <div class="ba-ico grn">⚡</div>
+          <div class="ba-item-text"><strong>Under 2 minutes per quote</strong><span>Paste the enquiry, click generate, download a professional PDF</span></div>
+        </div>
+        <div class="ba-item good">
+          <div class="ba-ico grn">✅</div>
+          <div class="ba-item-text"><strong>Quote every lead, same day</strong><span>No matter how many items — QuoteGen handles it all at once</span></div>
+        </div>
+        <div class="ba-item good">
+          <div class="ba-ico grn">📈</div>
+          <div class="ba-item-text"><strong>Win more orders, consistently</strong><span>Be the first to quote, every time. Buyers notice and remember.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="wrap">
+    <div class="section-label rv">How It Works</div>
+    <h2 class="rv rv1">Three Simple Steps. That's It.</h2>
+    <p class="how-sub rv rv1">No training required. Works for any trade — hardware, chemicals, industrial equipment, pipes, valves, and more.</p>
+    <div class="steps">
+      <div class="step rv rv1">
+        <div class="step-num done"><span class="n">1</span></div>
+        <div>
+          <h3>Copy the enquiry</h3>
+          <p>Customer sends you an email or WhatsApp with items they need. Just copy the text — messy and all.</p>
+        </div>
+      </div>
+      <div class="step rv rv2">
+        <div class="step-num done"><span class="n">2</span></div>
+        <div>
+          <h3>Paste into QuoteGen</h3>
+          <p>QuoteGen reads the items, auto-suggests products, and builds a clean itemised quote with GST in seconds.</p>
+        </div>
+      </div>
+      <div class="step rv rv3">
+        <div class="step-num done"><span class="n">3</span></div>
+        <div>
+          <h3>Download &amp; send</h3>
+          <p>A branded, professional PDF — ready to email before your competitor even opens the message.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MID CTA -->
+<section class="mid-cta">
+  <div class="wrap">
+    <div class="mid-cta-inner rv">
+      <div class="mid-cta-text">
+        <div class="mid-cta-eyebrow">Start for Free</div>
+        <h2 class="mid-cta-h">Ready to quote faster?</h2>
+        <p class="mid-cta-sub">Join 214+ businesses already winning more orders with QuoteGen.</p>
+      </div>
+      <div class="mid-cta-form">
+        <div class="cta-bar mid-cta-bar">
+          <div class="cta-bar-field">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <input id="midPhone" type="tel" placeholder="Mobile Number" inputmode="tel" aria-label="Mobile number">
+          </div>
+          <div class="cta-bar-divider"></div>
+          <span class="cta-bar-sep">OR</span>
+          <div class="cta-bar-divider"></div>
+          <div class="cta-bar-field">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="3"/><path d="M2 7l10 7 10-7"/></svg>
+            <input id="midEmail" type="email" placeholder="Email Address" aria-label="Email address">
+          </div>
+          <button id="midBar" class="btn-cta-bar" type="button">Get Free Trial →</button>
+        </div>
+        <p class="mid-cta-note">No credit card required</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="demo" id="demo">
+  <div class="wrap">
+    <div class="section-label rv">Live Demo</div>
+    <h2 class="rv rv1">See It Generate a Quote Right Now</h2>
+    <p class="demo-sub rv rv1">Click the button below and watch a real enquiry turn into a professional quotation in seconds.</p>
+    <div class="demo-wrap rv rv2">
+
+      <!-- INPUT -->
+      <div class="demo-card">
+        <div class="card-top">
+          <span class="badge badge-blue"></span>
+          <span class="card-top-label">Customer Enquiry</span>
+          <span class="mail-tag">Inbox</span>
+        </div>
+        <div class="mail-subject-row">
+          <h4 class="mail-subject">RFQ — Urgent plant maintenance</h4>
+        </div>
+        <div class="mail-from">
+          <div class="mail-avatar">R</div>
+          <div class="mail-from-info">
+            <div class="mail-from-top">
+              <span class="mail-from-name">Rakesh Patel</span>
+              <span class="mail-time">10:24 AM</span>
+            </div>
+            <div class="mail-from-email">&lt;purchase@abcchemicals.com&gt;</div>
+            <div class="mail-to">to me</div>
+          </div>
+        </div>
+        <div class="mail-body">
+          <p>Hello,</p>
+          <p>We require your most competitive quotation for the following items for our plant at Ankleshwar:</p>
+          <ul>
+            <li>2 Nos. FRP Pumps — 5 HP, horizontal</li>
+            <li>4 Nos. Butterfly Valves — 4", PN16</li>
+            <li>10 Mtr. SS Pipes — SS 304, schedule 40</li>
+          </ul>
+          <p>Please include unit pricing with GST, delivery timeline, warranty terms, and freight charges. Material needed by next Wednesday.</p>
+          <p>Regards,<br><b style="color:var(--ink)">Rakesh Patel</b> · Purchase Manager</p>
+        </div>
+        <div class="extract-row">
+          <button class="btn-extract" id="extractBtn" type="button">
+            <span class="spin"></span>
+            <svg class="ext-ico" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+            <span id="extractLabel">Extract &amp; Generate Quote</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- MIDDLE -->
+      <div class="demo-mid">
+        <div class="mid-arr"><span></span><span></span><span></span></div>
+        <div class="mid-q"><img src="logo-q.png" alt="QuoteGen"></div>
+        <div class="mid-arr"><span></span><span></span><span></span></div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div class="demo-card">
+        <div class="card-top">
+          <span class="badge badge-green"></span>
+          <span class="card-top-label">Generated Quotation</span>
+        </div>
+        <div class="result-inner">
+          <div class="result-placeholder" id="placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg>
+            <p>Your quotation will appear here</p>
+          </div>
+          <div class="result-shown" id="resultShown">
+            <div style="font-size:11px;color:var(--green);font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:4px">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M20 6L9 17l-5-5"/></svg>
+              Generated in 1.7 seconds
+            </div>
+            <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.08);">
+              <img src="Generated-Quotation.png" alt="Generated Quotation" style="width:100%;display:block;">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testi">
+  <div class="wrap">
+    <div class="section-label rv">What Users Say</div>
+    <h2 class="rv rv1">Real Results from Real Businesses</h2>
+    <p class="testi-sub rv rv1">Wholesalers and traders across Gujarat use QuoteGen every day.</p>
+    <div class="testi-grid">
+      <div class="testi-card rv rv1">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"I used to spend 40–45 minutes on one quote. Now it's done in under 2. <strong>I quoted 11 clients in a single afternoon.</strong> Never happened before in 14 years of business."</p>
+        <div class="testi-who"><div class="av av1">R</div><div><div class="av-name">Ramesh Trivedi</div><div class="av-role">Hardware Wholesaler · Surat</div></div></div>
+      </div>
+      <div class="testi-card rv rv2">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"We were losing clients to faster competitors. <strong>QuoteGen changed that.</strong> We now respond within the hour and our conversion has gone up noticeably."</p>
+        <div class="testi-who"><div class="av av2">P</div><div><div class="av-name">Priya Shah</div><div class="av-role">Industrial Supplies · Vadodara</div></div></div>
+      </div>
+      <div class="testi-card rv rv3">
+        <div class="stars">★★★★★</div>
+        <p class="testi-q">"The PDF looks so professional. <strong>Clients actually comment on it.</strong> It's made us look like a much bigger operation and helped us win larger orders too."</p>
+        <div class="testi-who"><div class="av av3">M</div><div><div class="av-name">Mukesh Patel</div><div class="av-role">Chemical Trader · Ankleshwar</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section" id="signup">
+  <div class="wrap">
+    <div class="cta-box rv">
+      <div class="cta-left">
+        <h2>Your Next Enquiry Deserves a Quote in Under 2 Minutes</h2>
+        <div class="cta-mini-testi">
+          <div class="stars">★★★★★</div>
+          <div class="cta-mini-q">"I quoted 11 clients in one afternoon. Never done that in 14 years."</div>
+          <div class="cta-mini-who">Ramesh T. · Hardware Wholesaler, Surat</div>
+        </div>
+      </div>
+      <div>
+        <div class="cta-form-card">
+          <div class="cta-form-title">Start Your Free Trial</div>
+          <div class="cta-form-note"><span class="live"></span> Our team sets you up same day</div>
+          <div class="cta-fields">
+              <input id="ctaPhone" type="tel" placeholder="Mobile Number" inputmode="tel">
+              <div class="cta-or"><span>OR</span></div>
+              <input id="ctaEmail" type="email" placeholder="Email Address">
+            </div>
+            <button id="ctaSubmit" class="btn-cta" type="button">Get Started Free <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+          <p class="cta-guarantee">Free trial · No payment required · Setup assistance included</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-logo"><img class="logo-mark" src="logo-q.png" alt="QuoteGen logo">QuoteGen</div>
+        <p class="foot-desc">The advanced quotation maker for industrial sales teams. Quote faster. Win more.</p>
+      </div>
+      <div>
+        <div class="foot-h">Links</div>
+        <div class="foot-links">
+          <a href="#demo">Live Demo</a>
+          <a href="#signup">Free Trial</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms of Service</a>
+        </div>
+      </div>
+      <div>
+        <div class="foot-h">Contact</div>
+        <div class="foot-contact">
+          <a href="mailto:info@digiteqsolution.com">info@digiteqsolution.com</a>
+          <a href="tel:+919067610118">+91 90676 10118</a>
+          <span>Ankleshwar GIDC, Gujarat — 393002</span>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bar">
+      <span>© 2026 QuoteGen. All rights reserved.</span>
+      <span>Made for industrial India</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+var nav=document.querySelector(".nav");
+addEventListener("scroll",function(){nav.style.boxShadow=scrollY>4?"0 1px 0 #E5E7EB":"none"},{passive:true});
+
+(function(){
+  var els=document.querySelectorAll(".rv");
+  if(!("IntersectionObserver" in window)){els.forEach(function(e){e.classList.add("in")});return}
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}});
+  },{threshold:.12,rootMargin:"0px 0px -30px 0px"});
+  els.forEach(function(e){io.observe(e)});
+})();
+
+(function(){
+  var btn=document.getElementById("extractBtn");
+  var label=document.getElementById("extractLabel");
+  var placeholder=document.getElementById("placeholder");
+  var result=document.getElementById("resultShown");
+  if(!btn)return;
+  btn.addEventListener("click",function(){
+    if(btn.classList.contains("done"))return;
+    label.textContent="Generating…";
+    btn.classList.add("busy");
+    setTimeout(function(){
+      btn.classList.remove("busy");
+      btn.classList.add("done");
+      label.textContent="Quotation Generated ✓";
+      placeholder.style.display="none";
+      result.classList.add("show");
+    },1400);
+  });
+})();
+</script>
+<script>
+var SUPABASE_URL = "https://vllymwxevoftgsilvyng.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZsbHltd3hldm9mdGdzaWx2eW5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyNzEzMjMsImV4cCI6MjA5Njg0NzMyM30.YGlfL536fEEnW58eSwOwSQ9hiQSN-wDH86eVUPdjl98";
+var LEADS_RPC = SUPABASE_URL + "/rest/v1/rpc/submit_lead";
+
+function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+function isValidPhone(v) { return (v.match(/\d/g) || []).length >= 7; }
+
+(function(){
+  var s = document.createElement("style");
+  s.textContent = ".qg-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#111827;color:#fff;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:500;padding:12px 22px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.22);z-index:9999;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;white-space:nowrap;max-width:90vw;text-align:center}.qg-toast.show{transform:translateX(-50%) translateY(0);opacity:1}.qg-toast.success{background:#16A34A}.qg-toast.error{background:#DC2626}";
+  document.head.appendChild(s);
+})();
+
+function showToast(msg, type) {
+  var t = document.getElementById("qg-toast");
+  if (!t) { t = document.createElement("div"); t.id = "qg-toast"; t.className = "qg-toast"; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.className = "qg-toast " + (type || "");
+  void t.offsetWidth;
+  t.classList.add("show");
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ t.classList.remove("show"); }, 4000);
+}
+
+async function saveLead(phone, email, source, btn, phoneEl, emailEl) {
+  phone = (phone || "").trim();
+  email = (email || "").trim();
+  email = email.toLowerCase();
+  if (phoneEl) phoneEl.closest(".cta-bar-field")?.classList.remove("err");
+  if (emailEl) emailEl.closest(".cta-bar-field")?.classList.remove("err");
+  if (phoneEl && !phoneEl.closest(".cta-bar-field")) phoneEl.classList.remove("err");
+  if (emailEl && !emailEl.closest(".cta-bar-field")) emailEl.classList.remove("err");
+
+  if (!phone && !email) {
+    showToast("Please enter your mobile number or email.", "error");
+    if (phoneEl) (phoneEl.closest(".cta-bar-field") || phoneEl).classList.add("err");
+    if (emailEl) (emailEl.closest(".cta-bar-field") || emailEl).classList.add("err");
+    return;
+  }
+  if (phone && !isValidPhone(phone)) {
+    showToast("Please enter a valid mobile number.", "error");
+    if (phoneEl) (phoneEl.closest(".cta-bar-field") || phoneEl).classList.add("err");
+    return;
+  }
+  if (email && !isValidEmail(email)) {
+    showToast("Please enter a valid email address.", "error");
+    if (emailEl) (emailEl.closest(".cta-bar-field") || emailEl).classList.add("err");
+    return;
+  }
+  if (btn) {
+    btn.disabled = true;
+    if (!btn.dataset.label) btn.dataset.label = btn.innerHTML;
+    btn.textContent = "Saving…";
+  }
+  try {
+    var resp = await fetch(LEADS_RPC, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_KEY,
+        "Authorization": "Bearer " + SUPABASE_KEY
+      },
+      body: JSON.stringify({ p_phone: phone || null, p_email: email || null, p_source: source })
+    });
+    var data = null;
+    try { data = await resp.json(); } catch (e) {}
+    if (resp.ok && data && data.success) {
+      showToast("Thanks! We'll be in touch soon.", "success");
+      if (phoneEl) phoneEl.value = "";
+      if (emailEl) emailEl.value = "";
+      if (btn) {
+        btn.disabled = false;
+        if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+      }
+      return;
+    }
+    var errText = "";
+    if (data) errText = data.error || data.message || data.hint || JSON.stringify(data);
+    else {
+      try { errText = await resp.text(); } catch(e2) { errText = "HTTP " + resp.status; }
+    }
+    console.error("[QuoteGen] Insert failed — status:", resp.status, "| error:", errText);
+    showToast("Something went wrong. Please try again.", "error");
+  } catch(ex) {
+    console.error("[QuoteGen] Fetch exception:", ex && ex.message ? ex.message : String(ex));
+    showToast("Could not reach server. Please try again.", "error");
+  }
+  if (btn) {
+    btn.disabled = false;
+    if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  function bindForm(btnId, phoneId, emailId, source) {
+    var btn = document.getElementById(btnId);
+    var phoneEl = document.getElementById(phoneId);
+    var emailEl = document.getElementById(emailId);
+    if (!btn) return;
+    function submit() {
+      saveLead(
+        phoneEl ? phoneEl.value : "",
+        emailEl ? emailEl.value : "",
+        source,
+        btn,
+        phoneEl,
+        emailEl
+      );
+    }
+    btn.addEventListener("click", submit);
+    [phoneEl, emailEl].forEach(function(el) {
+      if (!el) return;
+      el.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") { e.preventDefault(); submit(); }
+      });
+      el.addEventListener("input", function() {
+        if (el.closest(".cta-bar-field")) el.closest(".cta-bar-field").classList.remove("err");
+        else el.classList.remove("err");
+      });
+    });
+  }
+  bindForm("heroBar", "heroPhone", "heroEmail", "hero");
+  bindForm("midBar", "midPhone", "midEmail", "mid-cta");
+  bindForm("ctaSubmit", "ctaPhone", "ctaEmail", "bottom-cta");
+});
+</script>
+<script src="/smoothscroll.js"></script>
+
+</body>
+</html>
