@@ -712,6 +712,22 @@ var LEADS_RPC = SUPABASE_URL + "/rest/v1/rpc/submit_lead";
 function isValidEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 function isValidPhone(v) { return (v.match(/\d/g) || []).length >= 7; }
 
+async function sha256(str) {
+  if (!str) return undefined;
+  var msgBuffer = new TextEncoder().encode(str.trim().toLowerCase());
+  var hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
+  return Array.from(new Uint8Array(hashBuffer)).map(function(b){ return b.toString(16).padStart(2,"0"); }).join("");
+}
+
+async function trackLead(phone, email) {
+  try {
+    var userData = {};
+    if (email) userData.em = await sha256(email);
+    if (phone) userData.ph = await sha256(phone.replace(/\D/g,""));
+    fbq("track", "Lead", {}, userData);
+  } catch(e) { console.warn("[QuoteGen] Meta Pixel Lead event failed:", e); }
+}
+
 (function(){
   var s = document.createElement("style");
   s.textContent = ".qg-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#111827;color:#fff;font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:500;padding:12px 22px;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.22);z-index:9999;transition:transform .35s cubic-bezier(.22,1,.36,1),opacity .35s;opacity:0;white-space:nowrap;max-width:90vw;text-align:center}.qg-toast.show{transform:translateX(-50%) translateY(0);opacity:1}.qg-toast.success{background:#16A34A}.qg-toast.error{background:#DC2626}";
@@ -773,6 +789,7 @@ async function saveLead(phone, email, source, btn, phoneEl, emailEl) {
     try { data = await resp.json(); } catch (e) {}
     if (resp.ok && data && data.success) {
       showToast("Thanks! We'll be in touch soon.", "success");
+      trackLead(phone, email);
       if (phoneEl) phoneEl.value = "";
       if (emailEl) emailEl.value = "";
       if (btn) {
