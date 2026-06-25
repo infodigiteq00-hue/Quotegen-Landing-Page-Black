@@ -724,7 +724,7 @@ async function trackLead(phone, email) {
     var userData = {};
     if (email) userData.em = await sha256(email);
     if (phone) userData.ph = await sha256(phone.replace(/\D/g,""));
-    fbq("track", "Lead", {}, userData);
+    fbq("track", "Lead", { currency: "INR", value: 0 }, userData);
   } catch(e) { console.warn("[QuoteGen] Meta Pixel Lead event failed:", e); }
 }
 
