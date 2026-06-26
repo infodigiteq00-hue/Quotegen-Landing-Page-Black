@@ -809,6 +809,15 @@ async function saveLead(phone, email, source, btn, phoneEl, emailEl) {
       }
       return;
     }
+    // Duplicate contact (unique-constraint 409) — treat as success
+    if (resp.status === 409 || (data && data.code === "23505")) {
+      showToast("Thanks! We'll be in touch soon.", "success");
+      trackLead(phone, email);
+      if (phoneEl) phoneEl.value = "";
+      if (emailEl) emailEl.value = "";
+      if (btn) { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
+      return;
+    }
     var errText = "";
     if (data) errText = data.error || data.message || data.hint || JSON.stringify(data);
     else {
