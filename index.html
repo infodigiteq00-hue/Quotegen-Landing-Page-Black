@@ -665,7 +665,6 @@ async function saveLeadToSupabase(phoneRaw, emailRaw, source) {
         "Prefer": "return=minimal"
       },
       body: JSON.stringify({
-        name: null,
         phone: phone || null,
         email: email || null,
         source: source
