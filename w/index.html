@@ -33,11 +33,11 @@ n.queue=[];t=b.createElement(e);t.async=!0;
 t.src=v;s=b.getElementsByTagName(e)[0];
 s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
-fbq('init', '1647391619819927');
+fbq('init', '1026625536503155');
 fbq('track', 'PageView');
 </script>
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1647391619819927&ev=PageView&noscript=1"/></noscript>
+src="https://www.facebook.com/tr?id=1026625536503155&ev=PageView&noscript=1"/></noscript>
 <!-- End Meta Pixel Code -->
 <link rel="icon" type="image/png" href="/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -662,7 +662,7 @@ footer{background:#111827;color:#fff;padding:48px 0 0}
         <div class="foot-links">
           <a href="#demo">Live Demo</a>
           <a href="#signup">Free Trial</a>
-          <a href="#">Privacy Policy</a>
+          <a href="/privacy-policy.html">Privacy Policy</a>
           <a href="#">Terms of Service</a>
         </div>
       </div>
@@ -807,6 +807,15 @@ async function saveLead(phone, email, source, btn, phoneEl, emailEl) {
         btn.disabled = false;
         if (btn.dataset.label) btn.innerHTML = btn.dataset.label;
       }
+      return;
+    }
+    // Duplicate contact (unique-constraint 409) — treat as success
+    if (resp.status === 409 || (data && data.code === "23505")) {
+      showToast("Thanks! We'll be in touch soon.", "success");
+      trackLead(phone, email);
+      if (phoneEl) phoneEl.value = "";
+      if (emailEl) emailEl.value = "";
+      if (btn) { btn.disabled = false; if (btn.dataset.label) btn.innerHTML = btn.dataset.label; }
       return;
     }
     var errText = "";
